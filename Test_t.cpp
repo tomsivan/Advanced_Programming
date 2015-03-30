@@ -14,11 +14,6 @@ Test_t:: Test_t(int initialValue)
 	arr = new PersonArray_t(initialValue);
 }
 
-Test_t:: Test_t(int initialValue, int expand_value)
-{
-	arr = new PersonArray_t(initialValue, expand_value);
-}
-
 Test_t::~Test_t()
 {
 	delete(arr);
@@ -29,9 +24,9 @@ int Test_t::getNumofElem()
 	return arr->getNumberOfElements();
 }
 
-int Test_t::getCapacity()
+int Test_t::getm_capacity()
 {
-	return arr->getCapacity();
+	return arr->getm_capacity();
 }
 
 void Test_t::insert(Person_t* p)

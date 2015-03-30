@@ -27,13 +27,13 @@ public:
 	~Person_t();
 
 	//operators
-	Person_t& operator= (const Person_t& p);
-	bool operator== (const Person_t& p);
+	const Person_t& operator= (const Person_t& p); //TODO: check
+	bool operator== (const Person_t& p) const;
 
 	// getters
-	string  getName() const;
-	int     getAge()const;
-	size_t  getId() const;
+	string  getName() const { return m_name; };
+	int     getAge() const { return m_age; };
+	size_t  getId() const { return m_id; };
 
 	//functions
 	string toString();

@@ -12,86 +12,81 @@
 #include <string>
 using namespace std;
 
-PersonArray_t::PersonArray_t() // default constructor
+PersonArray_t::PersonArray_t() :  // default constructor
+m_expandValue(4), m_numOfElements(0)
 {
-	P_arr = new Person_t*[defualtExpandValue];
-	numOfElements = 0;
-	expandValue = defualtExpandValue;
-	capacity = expandValue;
+	m_personArr = new Person_t*[m_expandValue];
+	m_capacity = m_expandValue;
 }
 
-PersonArray_t::PersonArray_t(const int initialValue) // constructor from int
+PersonArray_t::PersonArray_t(const int initialValue) : // constructor from int
+m_expandValue(16), m_numOfElements(0)
 {
-	P_arr = new Person_t*[initialValue];
-	numOfElements = 0;
-	expandValue = defualtExpandValue;
-	capacity = initialValue;
+	m_personArr = new Person_t*[initialValue];
+	m_capacity = initialValue;
 }
 
-PersonArray_t::PersonArray_t(const int initialValue, const int expand_value) // constructor from int,int
+PersonArray_t::PersonArray_t(const PersonArray_t& arr) : // copy constructor
+m_expandValue(16)
 {
-	P_arr = new Person_t*[initialValue];
-	numOfElements = 0;
-	expandValue = expand_value;
-	capacity = initialValue;
-}
-
-PersonArray_t::PersonArray_t(const PersonArray_t& arr) // TODO: copy constructor
-{
-
+	m_capacity = arr.getCapacity();
+	m_numOfElements = arr.getNumberOfElements();
+	m_personArr = new Person_t*[m_capacity];
+	for (int i = 0; i < m_numOfElements; i++)
+	{
+		m_personArr[i] = arr.m_personArr[i];
+	}
 }
 
 PersonArray_t:: ~PersonArray_t() // destructor
 {
-	for (int i = 0; i < numOfElements; i++)
+	for (int i = 0; i < m_numOfElements; i++)
 	{
-		delete P_arr[i];
+		delete m_personArr[i];
 	}
+
+	delete[] m_personArr; // TODO - check
 }
 
 PersonArray_t& PersonArray_t:: operator= (const PersonArray_t& arr)
 {
-	if (this == &arr){
-		return *this;
+	if (this != &arr){
+		m_numOfElements = arr.m_numOfElements;
+		m_capacity = arr.m_capacity;
+		// to update
+		m_personArr = arr.m_personArr;
 	}
-	numOfElements = arr.numOfElements;
-	capacity = arr.capacity;
-	P_arr = arr.P_arr;
 
 	return *this;
 }
 
-int PersonArray_t::getNumberOfElements()
-{ 
-	return numOfElements; 
-}
-
-int PersonArray_t::getCapacity()
-{ 
-	return capacity; 
-}
-
 void PersonArray_t::insert(Person_t* p)
 {
-	if (is_Full())
+	if (!isEmpty())
 	{
-		addCapacity();
-	}			
-	P_arr[numOfElements] = p;
-	numOfElements++;
+		prepend(0, p);
+	}
+	else
+	{
+		prepend(m_numOfElements, p);
+	}
 }
 
 Person_t* PersonArray_t::getFirstElement()
 {
-	if (!is_Empty())
-		return P_arr[0];
+	if (!isEmpty())
+	{
+		return m_personArr[0];
+	}		
 	return NULL;
 }
 
 Person_t* PersonArray_t::getLastElement()
 {
-	if (!is_Empty())
-		return P_arr[numOfElements-1];
+	if (!isEmpty())
+	{
+		return m_personArr[m_numOfElements - 1];
+	}	
 	return NULL;
 }
 
@@ -99,7 +94,9 @@ Person_t* PersonArray_t::findElement(const Person_t* p)
 {
 	int p_indx = findElementIndx(p);
 	if (p_indx != -1)
-		return P_arr[p_indx];
+	{
+		return m_personArr[p_indx];
+	}
 	return 0;
 }
 
@@ -110,14 +107,14 @@ Person_t* PersonArray_t::removeElement(const Person_t* p)
 	{
 		return 0;
 	}
-	Person_t* pr = P_arr[p_indx];
+	Person_t* pr = m_personArr[p_indx];
 
-	for (int i = p_indx; i < numOfElements; i++) // shift left from that indx forward
+	for (int i = p_indx; i < m_numOfElements; i++) // shift left from that indx forward
 	{
-		P_arr[i] = P_arr[i + 1];
+		m_personArr[i] = m_personArr[i + 1];
 	}
-	P_arr[numOfElements-1] = NULL; 
-	numOfElements--;
+	m_personArr[m_numOfElements-1] = NULL; 
+	m_numOfElements--;
 
 	// TODO: deallocate??
 
@@ -126,31 +123,48 @@ Person_t* PersonArray_t::removeElement(const Person_t* p)
 
 void PersonArray_t::removeAllElements()
 {
-	for (int i = 0; i < numOfElements; i++)
+	for (int i = 0; i < m_numOfElements; i++)
 	{
-		P_arr[i] = NULL;
+		m_personArr[i] = NULL;
 	}
-	numOfElements = 0;
+	m_numOfElements = 0;
 
 	// TODO: deallocate??
 }
 
 void  PersonArray_t::removeAndDeleteElement(Person_t* p)
 {
-	removeElement(p);
-	delete(p);
+	for (int k = 0; k < m_numOfElements; k++)
+	{
+		int p_indx = findElementIndx(p); // we need the index in order to fix the array after remove
+		if (p_indx == -1) // no such person
+		{
+			return;
+		}
+		else
+		{
+			delete m_personArr[p_indx];
+
+			for (int i = p_indx; i < m_numOfElements; i++) // shift left from that indx forward
+			{
+				m_personArr[i] = m_personArr[i + 1];
+			}
+			m_personArr[m_numOfElements - 1] = NULL;
+			m_numOfElements--;
+		}
+	}
 
 	// TODO: deallocate??
 }
 
 void  PersonArray_t::removeAndDeleteAllElements()
 {
-	while (numOfElements > 0)
+	while (m_numOfElements > 0)
 	{
-		removeAndDeleteElement(P_arr[0]);
+		removeAndDeleteElement(m_personArr[0]);
 	}
 
-	if (numOfElements == 0)
+	if (m_numOfElements == 0)
 		cout << "removed and deleted all Elements" << endl;
 	else
 		cout << "There's a problem!!" << endl;
@@ -160,23 +174,17 @@ void  PersonArray_t::removeAndDeleteAllElements()
 
 int PersonArray_t::append(int indx, Person_t* p)
 {
-	if ((indx < 0) || (indx > numOfElements - 1) || (p == NULL))
-		return 0;
-
-	moveRight(indx + 2);
-	P_arr[indx + 1] = p;
-	numOfElements++;
-	return 1;
+	return prepend(indx + 1, p);
 }
 
 int PersonArray_t::prepend(int indx, Person_t* p)
 {
-	if ((indx < 0) || (indx > numOfElements) || (p == NULL))
+	if ((indx < 0) || (indx > m_numOfElements) || (p == NULL))
 		return 0;
 
 	moveRight(indx + 1);
-	P_arr[indx] = p;
-	numOfElements++;
+	m_personArr[indx] = p;
+	m_numOfElements++;
 	return 1;
 }
 
@@ -185,75 +193,74 @@ int PersonArray_t::findElementIndx(const Person_t* p)
 {
 	bool found = false;
 	int i = 0;
-	while ((!found) && (i < numOfElements))
+	while ((!found) && (i < m_numOfElements))
 	{
-		if (*P_arr[i] == *p)
+		if (*m_personArr[i] == *p)
 			found = true;
 		else
 			i++;
 	}
 
-	if (i < numOfElements)
+	if (i < m_numOfElements)
 		return i;
 	return -1;
-}
-
-bool PersonArray_t::is_Full()
-{
-	return capacity == numOfElements;
-}
-
-bool PersonArray_t::is_Empty()
-{
-	return numOfElements == 0;
 }
 
 void PersonArray_t::addCapacity()
 {
 	//allocate new memory
-	Person_t** newArr = new Person_t*[capacity + expandValue];
+	Person_t** newArr = new Person_t*[m_capacity + m_expandValue];
 	reAllocatePeople(newArr);
-	capacity += expandValue;
+	m_capacity += m_expandValue;
 }
 
 void PersonArray_t::reAllocatePeople(Person_t** newArr)
 {
 	//copy the elements to the new array
-	for (int i = 0; i < numOfElements; i++)
+	for (int i = 0; i < m_numOfElements; i++)
 	{
-		newArr[i] = P_arr[i];
+		newArr[i] = m_personArr[i];
 	}
 	//delete old array and update the pointer to the new one
-	delete[] P_arr;
-	P_arr = newArr;
+	delete[] m_personArr;
+	m_personArr = newArr;
 }
 
 void PersonArray_t::moveRight(int indx)
 {
-	if (is_Full())
-		addCapacity();
-	for (int i = numOfElements; i >= indx; i--)
+	if (isFull())
 	{
-		P_arr[i] = P_arr[i - 1];
+		addCapacity();
+	}	
+	for (int i = m_numOfElements; i >= indx; i--)
+	{
+		m_personArr[i] = m_personArr[i - 1];
 	}
 }
 
 /*void PersonArray_t::deAllocate()
 {
-	int newSize = ((int)(numOfElements / expandValue) + 1) * expandValue;
+	int newSize = ((int)(m_numOfElements / m_expandValue) + 1) * m_expandValue;
 	Person_t** newArray = new Person_t*[newSize];
 	reAllocatePeople(newArray);
-	capacity = newSize;
+	m_capacity = newSize;
 }*/
 
 void PersonArray_t::printArr()
 {
-	cout << "Array capccity: " << capacity << endl;
-	cout << "Number of Elements: " << numOfElements << endl;
+	cout << "Array capccity: " << m_capacity << endl;
+	cout << "Number of Elements: " << m_numOfElements << endl;
 	cout << "Elements: " << endl;
 	//cout << "       Name" << "      Age" << endl;
-	for (int i = 0; i < numOfElements; i++)
+	for (int i = 0; i < m_numOfElements; i++)
 	{
-		cout << "array[" << i << "]: " << P_arr[i]->toString() << endl;
+		try
+		{
+			cout << "array[" << i << "]: " << m_personArr[i]->toString() << endl;
+		}
+		catch (exception e)
+		{
+			cout << "the element was removed somewhere in the code!!" << endl;
+		}
 	}
 }

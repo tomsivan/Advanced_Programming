@@ -26,8 +26,8 @@ public:
 	~PersonArray_t(); // destructor
 	
 	// Getters
-	int getNumberOfElements();
-	int getCapacity();
+	int getNumberOfElements() const { return m_numOfElements; }
+	int getCapacity() const { return m_capacity; }
 
 	// desired functions
 	Person_t* getFirstElement();
@@ -42,26 +42,27 @@ public:
 	int prepend(int indx, Person_t* p);
 
 	// added functions
-	bool is_Full();
-	bool is_Empty();
+	void printArr();
+
+private:
+	// type members
+	const int	m_expandValue;
+	int         m_numOfElements;
+	int			m_capacity;
+	Person_t**  m_personArr;
+
+	// So won't be able to copy them
+	PersonArray_t(const PersonArray_t& p);				// copy constructor
+	PersonArray_t& operator= (const PersonArray_t& p);	// Asignment operator
+
+	// added functions
+	bool isFull() { return m_numOfElements == m_capacity; }
+	bool isEmpty() { return m_numOfElements == 0; }
 	void addCapacity();
 	void reAllocatePeople(Person_t** newArray);
 	void deAllocatePeople(Person_t** newArray);
 	int findElementIndx(const Person_t* p);
 	void moveRight(int indx);
-	void printArr();
-
-private:
-	Person_t**  P_arr;
-
-	int         numOfElements;
-	int			capacity;
-	int			expandValue;
-	const int	defualtExpandValue = 16;
-
-	// So won't be able to copy them
-	PersonArray_t(const PersonArray_t& p);				// copy constructor
-	PersonArray_t& operator= (const PersonArray_t& p);	// Asignment operator
 };
 
 #endif /* defined(__Adv_Ex1__PersonArray_t__) */

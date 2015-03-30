@@ -8,13 +8,12 @@ class Test_t
 public:
 	Test_t();
 	Test_t(int initialValue);
-	Test_t(int initialValue, int expand_value);
 	~Test_t();
 
 	PersonArray_t* arr;
 
 	int getNumofElem();
-	int getCapacity();
+	int getm_capacity();
 	void insert(Person_t* p);
 	void getFirstElement();
 	void getLastElement();

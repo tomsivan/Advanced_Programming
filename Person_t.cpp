@@ -38,12 +38,11 @@ Person_t:: ~Person_t() // destructor
 //operators
 Person_t& Person_t::operator=(const Person_t& p)
 {
-	if (this == &p)
+	if (this != &p)
 	{
-		return *this;
+		m_name = p.getName();
+		m_age = p.getAge();
 	}
-	m_name = p.getName();
-	m_age = p.getAge();
 
 	return *this;
 }
@@ -52,11 +51,6 @@ bool Person_t::operator==(const Person_t& p)
 {
 	return (m_age == p.getAge()) && (!strcmp(m_name.c_str(), p.m_name.c_str()));
 }
-
-// getters
-string Person_t::getName()const	{ return m_name; };
-int Person_t::getAge()const		{ return m_age; };
-size_t Person_t::getId()const	{ return m_id; };
 
 //functions
 string Person_t::toString()
